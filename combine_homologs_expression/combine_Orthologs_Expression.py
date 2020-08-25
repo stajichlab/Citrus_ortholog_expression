@@ -1,74 +1,64 @@
 #!/usr/bin/env python3
-import numpy as np
+# Author: Talieh Ostovar
 
-data1 = np.genfromtxt('Orthogroups.txt', delimiter=' ', deletechars=":", usecols=(0), dtype=str)
+import re, sys, csv
 
-data2 = np.genfromtxt('Orthogroups_SingleCopyOrthologues.txt', delimiter=' ', usecols=(0), dtype=str, deletechars='OG')
-data3 = [d.replace('OG', '') for d in data2]
-data3 = [int(d) for d in data3]
-data4 = [d.replace('OG', '').replace(':', '') for d in data1]
-data4 = [int(d) for d in data4]
 
-with open('Orthogroups.txt', 'r') as f:
-    lines = f.readlines()
-with open('res.txt', 'w') as outFile:
-    for i in data3:
-        outFile.write(lines[i].replace(':', ''))
+singlecopy="Orthogroups_SingleCopyOrthologues.txt"
+orthogroups="Orthogroups.txt"
 
-fromRes = np.genfromtxt('res.txt', delimiter=' ', dtype=str)
+TPMfiles = ['TPM_reticulata_embryo_r1.tsv','TPM_sinensis_embryo_r1.tsv']
 
-tpm4reticualta = np.genfromtxt('TPM_reticulata_embryo_r1.tsv', delimiter=' ', dtype=str)
-tpm4sinesis = np.genfromtxt('TPM_sinensis_embryo_r1.tsv', delimiter=' ', dtype=str)
+singlecopyOG = set() #  a set is like a list but it is only a unique set of items
 
-secCol = fromRes[:, 1]
-thirdCol = fromRes[:, 2]
-tpmCol2 = np.zeros(9357)
-tpmCol3 = np.zeros(9357)
-counter = 0
+# read in the names of the single copy orthologs to keep
+with open(singlecopy,"r") as sc:
+    for line in sc:
+        singlecopyOG.add(line.strip())
 
-for item2 in secCol:
-    if "MSY" in item2:
-        # go check the file for ms
-        for i in tpm4reticualta:
-            if item2 == i[0]:
-                tpmCol2[counter] = i[1]
-                break
+# read in the orthogroups
+OGdata = {}
 
-    if "Cs" in item2:
-        for i in tpm4sinesis:
-            if item2 == i[0]:
-                tpmCol2[counter] = i[1]
-                break
+TPMs = {} # can assume that gene names are unique so put them all in one place
+# this structure needs to change when you want to incorporate multiple
+# expression timepoints/replicates
+# loop through the names of the files
+for TPMfile in TPMfiles:
+    # open the file
+    with open(TPMfile,"r") as tsvfile:
+        # if they really were tab delimited use this
+        #exprdr = csv.reader(tsvfile, delimiter='\t')
+        # parse file with csv module in python
+        exprdr = csv.reader(tsvfile, delimiter=' ')
+        header=next(exprdr)
+        for row in exprdr:
+            (gene_name,TPM) = row
+            TPMs[gene_name] = TPM
 
-    if "orange" in item2:
-        for i in tpm4sinesis:
-            if item2 == i[0]:
-                tpmCol2[counter] = i[1]
-                break
-    counter = counter + 1
-counter = 0
-for item3 in thirdCol:
-    if "MSY" in item3:
-        # go check the file for ms
-        for i in tpm4reticualta:
-            if item3 == i[0]:
-                # this is tpm
-                tpmCol3[counter] = i[1]
-                break
 
-    if "Cs" in item3:
-        for i in tpm4sinesis:
-            if item3 == i[0]:
-                # this is tpm
-                tpmCol3[counter] = i[1]
-                break
+print("\t".join(["Orthogroup",'Cr','Cr.TPM','Cs','Cs.TPM']))
 
-    if "orange" in item3:
-        for i in tpm4sinesis:
-            if item3 == i[0]:
-                tpmCol3[counter] = i[1]
-                break
-    counter = counter + 1
+with open(orthogroups,"r") as og:
+    for line in og:
+        # split the Orthogroups line by whitespace (space)
+        gene_names = line.split()
+        # take first item off this is Orthogroup ID
+        # remove the ':' in the name at same time
+        orthogroupID = re.sub(":","",gene_names.pop(0))
 
-tpmCat = np.concatenate((tpmCol2.reshape(-1, 1), tpmCol3.reshape(-1, 1)), axis=1)
-finalResult = np.concatenate((fromRes, tpmCat), axis=1)
+        if orthogroupID in singlecopyOG:
+            og = dict()
+            for gene in gene_names:
+                if gene.startswith("MSY"):
+                    og['Cr'] = [gene,TPMs[gene]]
+                elif gene.startswith("Cs") or gene.startswith("orange"):
+                    og['Cs'] = [gene,TPMs[gene]]
+                else:
+                    sys.stderr.write("Unknown gene pattern for '%s' cannot guess Species"%(gene))
+
+            OGdata[orthogroupID] = og
+            print("\t".join([orthogroupID,
+                             og['Cr'][0],
+                             og['Cr'][1],
+                             og['Cs'][0],
+                             og['Cs'][1] ]))
