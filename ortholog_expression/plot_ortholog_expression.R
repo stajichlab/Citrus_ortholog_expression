@@ -1,6 +1,7 @@
 library(ggplot2)
 library(dplyr)
 library(tidyverse)
+pdf("ggplots.pdf")
 
 orthtable <- read_delim("Citrus_orthologs_TPM.tsv",delim="\t",
                         col_names = TRUE)
@@ -14,10 +15,10 @@ hist(orthtable.filter$foldchange,breaks=100)
 twofold_upDown = orthtable.filter %>% filter(foldchange > 1 | foldchange < -1)
 #  this is the same thing as above
 #twofold_upDown = subset(orthtable.filter, orthtable.filter$foldchange > 1 | orthtable.filter$foldchange < -1)
+
 hist(twofold_upDown$foldchange,breaks=100)
 ggplot(twofold_upDown, aes(x=log(Cs.expr), y=log(Cr.expr))) + geom_point()
 
-pdf("ggplots.pdf")
 ggplot(orthtable.filter, aes(x=log(Cs.expr), y=log(Cr.expr))) + geom_point()
 ggplot(orthtable.filter, aes(x=Cs.expr, y=Cr.expr)) + geom_point()
 cor(orthtable.filter$Cs.expr,orthtable.filter$Cr.expr)
