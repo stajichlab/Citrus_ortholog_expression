@@ -2,11 +2,11 @@ library(ggplot2)
 library(dplyr)
 library(tidyverse)
 
-orthtable <- read_delim("Citrus_Orthologs_v20200817.tsv",delim="\t",
-                        col_names = c("OrthoGroup","Cs", "Cr", "Cs.expr","Cr.expr"))
-length(orthtable$OrthoGroup) # how many rows?
+orthtable <- read_delim("Citrus_orthologs_TPM.tsv",delim="\t",
+                        col_names = TRUE)
+length(orthtable$Orthogroup) # how many rows?
 orthtable.filter = orthtable %>% filter(Cs.expr > 10 & Cr.expr > 10)
-length(orthtable.filter$OrthoGroup) # how many rows?
+length(orthtable.filter$Orthogroup) # how many rows?
 
 orthtable.filter$foldchange <- log(orthtable.filter$Cs.expr/orthtable.filter$Cr.expr)/log(2)
 hist(orthtable.filter$foldchange,breaks=100)
