@@ -36,7 +36,7 @@ for TPMfile in TPMfiles:
             TPMs[gene_name] = TPM
 
 
-print("\t".join(["Orthogroup",'Species','Gene','TPM']))
+print("\t".join(["Orthogroup",'Species','Gene','Expr']))
 
 with open(orthogroups,"r") as og:
     for line in og:
