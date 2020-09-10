@@ -3,7 +3,6 @@
 
 import re, sys, csv
 
-
 singlecopy="Orthogroups_SingleCopyOrthologues.txt"
 orthogroups="Orthogroups.txt"
 
