@@ -3,7 +3,6 @@
 
 import re, sys, csv
 
-
 singlecopy="Orthogroups_SingleCopyOrthologues.txt"
 orthogroups="Orthogroups.txt"
 
@@ -49,12 +48,13 @@ with open(orthogroups,"r") as og:
         if orthogroupID in singlecopyOG:
             og = dict()
             for gene in gene_names:
-                if gene.startswith("MSY"):
-                    og['Cr'] = [gene,TPMs[gene]]
-                elif gene.startswith("Cs") or gene.startswith("orange"):
-                    og['Cs'] = [gene,TPMs[gene]]
-                else:
-                    sys.stderr.write("Unknown gene pattern for '%s' cannot guess Species"%(gene))
+                if gene in TPMs:
+                    if gene.startswith("MSY"):
+                        og['Cr'] = [gene,TPMs[gene]]
+                    elif gene.startswith("Cs") or gene.startswith("orange"):
+                        og['Cs'] = [gene,TPMs[gene]]
+                    else:
+                        sys.stderr.write("Unknown gene pattern for '%s' cannot guess Species"%(gene))
 
             OGdata[orthogroupID] = og
             print("\t".join([orthogroupID,
