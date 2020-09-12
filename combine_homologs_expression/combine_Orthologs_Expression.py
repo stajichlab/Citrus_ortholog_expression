@@ -57,8 +57,9 @@ with open(orthogroups,"r") as og:
                         sys.stderr.write("Unknown gene pattern for '%s' cannot guess Species"%(gene))
 
             OGdata[orthogroupID] = og
-            print("\t".join([orthogroupID,
-                             og['Cr'][0],
-                             og['Cr'][1],
-                             og['Cs'][0],
-                             og['Cs'][1] ]))
+            if 'Cr' in og and 'Cs' in og:
+                print("\t".join([orthogroupID,
+                                og['Cr'][0],
+                                og['Cr'][1],
+                                og['Cs'][0],
+                                og['Cs'][1] ]))
