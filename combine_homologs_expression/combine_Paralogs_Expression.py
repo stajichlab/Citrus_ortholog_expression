@@ -48,9 +48,10 @@ with open(orthogroups,"r") as og:
         if orthogroupID not in singlecopyOG:
             og = dict()
             for gene in gene_names:
-                if gene.startswith("MSY"):
-                    print("\t".join([orthogroupID,'Cr',gene,TPMs[gene]]))
-                elif gene.startswith("Cs") or gene.startswith("orange"):
-                    print("\t".join([orthogroupID,'Cs',gene,TPMs[gene]]))
-                else:
-                    sys.stderr.write("Unknown gene pattern for '%s' cannot guess Species"%(gene))
+                if gene in TPMs:
+                    if gene.startswith("MSY"):
+                        print("\t".join([orthogroupID,'Cr',gene,TPMs[gene]]))
+                    elif gene.startswith("Cs") or gene.startswith("orange"):
+                        print("\t".join([orthogroupID,'Cs',gene,TPMs[gene]]))
+                    else:
+                        sys.stderr.write("Unknown gene pattern for '%s' cannot guess Species"%(gene))
